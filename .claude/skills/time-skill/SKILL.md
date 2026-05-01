@@ -1,32 +1,32 @@
 ---
 name: time-skill
-description: Display the current time in Pakistan Standard Time (PKT, UTC+5). Use when the user asks for the current time, Pakistan time, or PKT.
+description: 파키스탄 표준시(PKT, UTC+5) 기준으로 현재 시간을 표시합니다. 사용자가 현재 시간, 파키스탄 시간 또는 PKT를 요청할 때 사용하세요.
 user-invocable: true
 ---
 
-# Time Skill
+# Time 스킬
 
-This skill displays the current date and time in Pakistan Standard Time (PKT).
+이 스킬은 파키스탄 표준시(PKT) 기준으로 현재 날짜와 시간을 표시합니다.
 
-## Task
+## 작업
 
-Display the current date and time in Pakistan Standard Time (UTC+5).
+파키스탄 표준시(UTC+5) 기준으로 현재 날짜와 시간을 표시합니다.
 
-## Instructions
+## 지침
 
-1. **Get Current Time**: Run the following bash command:
+1. **현재 시간 가져오기**: 다음 bash 명령어를 실행합니다:
    ```
    TZ='Asia/Karachi' date '+%Y-%m-%d %H:%M:%S %Z'
    ```
 
-2. **Display Result**: Show the time in this format:
+2. **결과 표시**: 다음 형식으로 시간을 표시합니다:
    ```
    Current Time in Pakistan (PKT): YYYY-MM-DD HH:MM:SS PKT
    ```
 
-## Requirements
+## 요구사항
 
-- Always use the `Asia/Karachi` timezone (UTC+5)
-- Use 24-hour format
-- Include the date alongside the time
-- Keep the output concise — no extra commentary
+- 항상 `Asia/Karachi` 타임존(UTC+5)을 사용합니다
+- 24시간 형식을 사용합니다
+- 시간과 함께 날짜를 포함합니다
+- 출력을 간결하게 유지합니다 — 추가 주석 없음
