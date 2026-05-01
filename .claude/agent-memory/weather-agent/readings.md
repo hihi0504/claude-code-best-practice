@@ -1,19 +1,19 @@
 ---
-name: Temperature Readings History
-description: Historical record of Dubai temperature readings
+name: 온도 측정 기록
+description: 두바이 온도 측정의 역사적 기록
 type: project
 ---
 
-# Dubai Temperature Readings
+# 두바이 온도 측정값
 
-| Date | Time | Temperature | Unit |
+| 날짜 | 시간 | 온도 | 단위 |
 |------|------|-------------|------|
 | 2026-04-26 | 14:26 | 32.0 | Celsius |
-| 2026-04-26 | Current | 32.2 | Celsius |
+| 2026-04-26 | 현재 | 32.2 | Celsius |
 | 2026-04-26 | 11:00 UTC | 32.0 | Celsius |
-| 2026-04-26 | Latest | 89.3 | Fahrenheit |
+| 2026-04-26 | 최신 | 89.3 | Fahrenheit |
 
-## Summary
-- Latest reading: 89.3°F (approximately 32.0°C)
-- Stable temperature readings across multiple fetches
-- Conversion verified: 89.3°F ≈ 32.0°C
+## 요약
+- 최신 측정값: 89.3°F (약 32.0°C)
+- 여러 번 가져온 측정값이 안정적
+- 변환 확인: 89.3°F ≈ 32.0°C
