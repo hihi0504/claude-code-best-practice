@@ -1,141 +1,141 @@
 ---
-description: Track Claude Code settings report changes and find what needs updating
-argument-hint: [number of versions to check, default 10]
+description: Claude Code 설정 보고서 변경 사항을 추적하고 업데이트가 필요한 항목을 찾습니다
+argument-hint: [확인할 버전 수, 기본값 10]
 ---
 
-# Workflow Changelog — Settings Report
+# Workflow Changelog — Settings 보고서
 
-You are a coordinator for the claude-code-best-practice project. Your job is to launch two research agents in parallel, wait for their results, merge findings, and present a unified report about drift in the **Settings Reference** report (`best-practice/claude-settings.md`).
+저는 claude-code-best-practice 프로젝트의 코디네이터입니다. 두 개의 리서치 에이전트를 병렬로 실행하고, 결과를 기다리고, 결과를 합치고, **Settings 참조** 보고서(`best-practice/claude-settings.md`)의 드리프트에 관한 통합 보고서를 제출하는 것이 역할입니다.
 
-**Versions to check:** `$ARGUMENTS` (default: 10 if empty or not a number)
+**확인할 버전:** `$ARGUMENTS` (비어 있거나 숫자가 아닌 경우 기본값: 10)
 
-This is a **read-then-report** workflow. Launch agents, merge results, and produce a report. Only take action if the user approves.
+**읽기 후 보고** 워크플로우입니다. 에이전트를 실행하고, 결과를 합치고, 보고서를 작성합니다. 사용자가 승인한 경우에만 작업을 수행합니다.
 
 ---
 
-## Phase 0: Launch Both Agents in Parallel
+## Phase 0: 두 에이전트 병렬 실행
 
-**Immediately** spawn both agents using the Task tool **in the same message** (parallel launch):
+Task 도구를 사용하여 **동일한 메시지에서** 두 에이전트를 **즉시** 병렬로 실행합니다:
 
-### Agent 1: workflow-claude-settings-agent
+### 에이전트 1: workflow-claude-settings-agent
 
-Spawn using `subagent_type: "workflow-claude-settings-agent"`. Give it this prompt:
+`subagent_type: "workflow-claude-settings-agent"`를 사용하여 실행합니다. 이 프롬프트를 제공합니다:
 
-> Research the claude-code-best-practice project for settings report drift. Check the last $ARGUMENTS versions (default: 10).
+> claude-code-best-practice 프로젝트의 설정 보고서 드리프트를 리서치하세요. 마지막 $ARGUMENTS 버전(기본값: 10)을 확인하세요.
 >
-> Fetch these 3 external sources:
-> 1. Settings Documentation: https://code.claude.com/docs/en/settings
-> 2. CLI Reference: https://code.claude.com/docs/en/cli-reference
-> 3. Changelog: https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md
+> 다음 3개의 외부 소스를 가져오세요:
+> 1. 설정 문서: https://code.claude.com/docs/en/settings
+> 2. CLI 참조: https://code.claude.com/docs/en/cli-reference
+> 3. 변경 로그: https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md
 >
-> Then read the local report file (`best-practice/claude-settings.md`) and the CLAUDE.md file. Analyze differences between what the official docs say about settings keys, permission syntax, hook events, MCP configuration, sandbox options, plugin settings, model aliases, display settings, and environment variables versus what our report documents. Return a structured findings report covering missing settings, changed types/defaults, new settings additions, deprecated settings, permission syntax changes, hook event changes, MCP setting changes, sandbox setting changes, environment variable completeness, example accuracy, settings hierarchy accuracy, and sources validity.
+> 그런 다음 로컬 보고서 파일(`best-practice/claude-settings.md`)과 CLAUDE.md 파일을 읽으세요. 공식 문서가 설정 키, 권한 구문, 훅 이벤트, MCP 구성, 샌드박스 옵션, 플러그인 설정, 모델 별칭, 표시 설정, 환경 변수에 대해 말하는 것과 보고서가 문서화하는 것 사이의 차이점을 분석하세요. 누락된 설정, 변경된 타입/기본값, 새 설정 추가, 폐기된 설정, 권한 구문 변경, 훅 이벤트 변경, MCP 설정 변경, 샌드박스 설정 변경, 환경 변수 완전성, 예제 정확성, 설정 계층 정확성, 소스 유효성을 다루는 구조화된 결과 보고서를 반환하세요.
 
-### Agent 2: claude-code-guide
+### 에이전트 2: claude-code-guide
 
-Spawn using `subagent_type: "claude-code-guide"`. Give it this prompt:
+`subagent_type: "claude-code-guide"`를 사용하여 실행합니다. 이 프롬프트를 제공합니다:
 
-> Research the latest Claude Code settings system. I need you to find:
-> 1. The complete list of all currently supported settings.json keys with their types, defaults, and descriptions
-> 2. Any new settings keys introduced in recent Claude Code versions
-> 3. Changes to existing settings behavior (e.g. new permission modes, new hook events, new sandbox options)
-> 4. Changes to the settings hierarchy (new priority levels, new file locations)
-> 5. Changes to permission syntax (new tool patterns, new wildcard behavior)
-> 6. New hook events or changes to hook configuration structure
-> 7. Changes to MCP server configuration (new matching fields, new settings)
-> 8. Changes to sandbox settings (new network options, new commands)
-> 9. Changes to plugin configuration (new fields, new marketplace options)
-> 10. Changes to environment variables (new vars, deprecated vars, changed behavior)
-> 11. Changes to model aliases or model configuration
-> 12. Changes to display/UX settings (status line, spinners, progress bars)
-> 13. Any deprecations or removals of settings keys
+> 최신 Claude Code 설정 시스템을 리서치하세요. 다음을 찾아야 합니다:
+> 1. 현재 지원되는 모든 settings.json 키의 전체 목록(타입, 기본값, 설명 포함)
+> 2. 최근 Claude Code 버전에서 도입된 새 설정 키
+> 3. 기존 설정 동작 변경 (예: 새 권한 모드, 새 훅 이벤트, 새 샌드박스 옵션)
+> 4. 설정 계층 변경 (새 우선순위 수준, 새 파일 위치)
+> 5. 권한 구문 변경 (새 도구 패턴, 새 와일드카드 동작)
+> 6. 새 훅 이벤트 또는 훅 구성 구조 변경
+> 7. MCP 서버 구성 변경 (새 매칭 필드, 새 설정)
+> 8. 샌드박스 설정 변경 (새 네트워크 옵션, 새 명령어)
+> 9. 플러그인 구성 변경 (새 필드, 새 마켓플레이스 옵션)
+> 10. 환경 변수 변경 (새 변수, 폐기된 변수, 변경된 동작)
+> 11. 모델 별칭 또는 모델 구성 변경
+> 12. 표시/UX 설정 변경 (상태 라인, 스피너, 진행 표시줄)
+> 13. 설정 키의 폐기 또는 제거
 >
-> Be thorough — search the web, fetch docs, and provide concrete version numbers and details for everything you find.
+> 철저하게 진행하세요 — 웹을 검색하고, 문서를 가져오고, 발견한 모든 것에 대한 구체적인 버전 번호와 세부 정보를 제공하세요.
 
-Both agents run independently and will return their findings.
-
----
-
-## Phase 0.5: Read Verification Checklist
-
-**While agents are running**, read `changelog/best-practice/claude-settings/verification-checklist.md`. This file contains accumulated verification rules — each rule specifies what to check, at what depth, and against which source. Every rule MUST be executed during Phase 2. The checklist is the project's regression test suite for drift detection.
+두 에이전트는 독립적으로 실행되어 결과를 반환합니다.
 
 ---
 
-## Phase 1: Read Previous Changelog Entries
+## Phase 0.5: 검증 체크리스트 읽기
 
-**Before merging findings**, read the file `changelog/best-practice/claude-settings/changelog.md` to get the last 25 changelog entries. Each entry is separated by `---`. Parse the priority actions from those previous entries so you can compare them against the current findings. This lets you identify:
-- **Recurring items** — issues that appeared before and are still unresolved
-- **Newly resolved items** — issues from previous runs that are now fixed
-- **New items** — issues that appear for the first time in this run
+**에이전트가 실행되는 동안**, `changelog/best-practice/claude-settings/verification-checklist.md`를 읽습니다. 이 파일에는 누적된 검증 규칙이 포함되어 있습니다 — 각 규칙은 무엇을 어느 깊이로 어느 소스와 비교하여 확인할지 지정합니다. Phase 2 동안 모든 규칙이 실행되어야 합니다. 체크리스트는 드리프트 감지를 위한 프로젝트의 회귀 테스트 스위트입니다.
 
 ---
 
-## Phase 2: Merge Findings & Generate Report
+## Phase 1: 이전 변경 로그 항목 읽기
 
-**Wait for both agents to complete.** Once you have:
-- **workflow-claude-settings-agent findings** — detailed report analysis with local file reads, external doc fetches, and drift detection
-- **claude-code-guide findings** — independent research on latest Claude Code settings features and changes
+**결과를 합치기 전에**, `changelog/best-practice/claude-settings/changelog.md` 파일을 읽어 마지막 25개 변경 로그 항목을 가져옵니다. 각 항목은 `---`로 구분됩니다. 이전 항목에서 우선순위 작업을 파싱하여 현재 결과와 비교합니다. 이를 통해 다음을 식별할 수 있습니다:
+- **반복 항목** — 이전에 나타났고 아직 해결되지 않은 문제
+- **새로 해결된 항목** — 이전 실행에서 현재 수정된 문제
+- **새 항목** — 이번 실행에서 처음 나타나는 문제
 
-Cross-reference the two. The dedicated agent provides report-specific drift analysis, while the claude-code-guide agent may surface things it missed (e.g. very recent changes, undocumented features, or context from web searches). Flag any contradictions between the two for the user to resolve.
+---
 
-**Execute the verification checklist:** For every rule in `changelog/best-practice/claude-settings/verification-checklist.md`, perform the check at the specified depth using the agent findings as source data. Include a **Verification Log** section in the report showing each rule's result:
+## Phase 2: 결과 합치기 및 보고서 생성
+
+**두 에이전트가 완료될 때까지 기다립니다.** 다음이 갖춰지면:
+- **workflow-claude-settings-agent 결과** — 로컬 파일 읽기, 외부 문서 가져오기, 드리프트 감지가 포함된 상세 보고서 분석
+- **claude-code-guide 결과** — 최신 Claude Code 설정 기능 및 변경 사항에 대한 독립적 리서치
+
+두 결과를 교차 참조합니다. 전용 에이전트는 보고서별 드리프트 분석을 제공하고, claude-code-guide 에이전트는 그것이 놓친 것(예: 매우 최근의 변경 사항, 문서화되지 않은 기능, 웹 검색의 컨텍스트)을 발견할 수 있습니다. 두 에이전트 간의 모순이 있으면 사용자에게 해결을 위해 표시합니다.
+
+**검증 체크리스트 실행:** `changelog/best-practice/claude-settings/verification-checklist.md`의 모든 규칙에 대해, 에이전트 결과를 소스 데이터로 사용하여 지정된 깊이로 확인을 수행합니다. 보고서에 각 규칙의 결과를 보여주는 **검증 로그** 섹션을 포함합니다:
 
 ```
 Verification Log:
 Rule # | Category              | Depth         | Result | Notes
-1      | Settings Keys         | field-level   | PASS   | All keys match
-2      | Permission Syntax     | content-match | FAIL   | New tool pattern added
+1      | Settings Keys         | field-level   | PASS   | 모든 키 일치
+2      | Permission Syntax     | content-match | FAIL   | 새 도구 패턴 추가됨
 ...
 ```
 
-**Update the checklist if needed:** If a finding reveals a new type of drift that no existing checklist rule covers (or covers at insufficient depth), append a new rule to `changelog/best-practice/claude-settings/verification-checklist.md`. The rule must include: category, what to check, depth level, what source to compare against, date added, and the origin (what error prompted this rule). Do NOT add rules for one-off issues that won't recur.
+**필요시 체크리스트 업데이트:** 결과가 기존 체크리스트 규칙이 다루지 않는(또는 불충분한 깊이로 다루는) 새로운 유형의 드리프트를 드러내는 경우, `changelog/best-practice/claude-settings/verification-checklist.md`에 새 규칙을 추가합니다. 규칙에는 카테고리, 확인할 내용, 깊이 수준, 비교할 소스, 추가 날짜, 출처(이 규칙을 야기한 오류)가 포함되어야 합니다. 반복되지 않을 일회성 문제에 대한 규칙은 추가하지 마세요.
 
-Also compare the current findings against the previous changelog entries (from Phase 1). For each priority action, mark it as:
-- `NEW` — first time this issue appears
-- `RECURRING` — appeared in a previous run and is still unresolved (include which run date it first appeared)
-- `RESOLVED` — appeared in a previous run but is now fixed (include resolution date)
+또한 현재 결과를 이전 변경 로그 항목(Phase 1에서)과 비교합니다. 각 우선순위 작업에 대해 다음으로 표시합니다:
+- `NEW` — 이 문제가 처음 나타남
+- `RECURRING` — 이전 실행에서 나타났고 아직 해결되지 않음 (처음 나타난 실행 날짜 포함)
+- `RESOLVED` — 이전 실행에서 나타났지만 이제 수정됨 (해결 날짜 포함)
 
-Produce a structured report with these sections:
+다음 섹션으로 구조화된 보고서를 작성합니다:
 
-1. **New Settings Keys** — Keys in official docs but missing from report, with version introduced
-2. **Changed Setting Behavior** — Settings whose type, default, or description has changed
-3. **Deprecated/Removed Settings** — Settings in report but no longer in official docs
-4. **Permission Syntax Changes** — New tool patterns, wildcard behavior, or permission mode changes
-5. **MCP Setting Changes** — New MCP configuration keys, matching behavior, or server settings
-6. **Sandbox Setting Changes** — New sandbox options, network settings, or command exclusions
-7. **Plugin Setting Changes** — New plugin configuration keys or marketplace options
-8. **Model Configuration Changes** — New model aliases, effort levels, or model environment variables
-9. **Display & UX Changes** — New status line fields, spinner options, or display settings
-10. **Environment Variable Completeness** — Vars in official docs but missing from report, or vars in report no longer documented
-11. **Settings Hierarchy Accuracy** — Verify priority levels, file locations, and override behavior
-12. **Example Accuracy** — Whether the Quick Reference complete example reflects current settings
-13. **Sources Accuracy** — Verify all source links are valid and point to correct documentation
-14. **claude-code-guide Agent Findings** — Unique insights from the agent that weren't captured by the dedicated agent. Only include findings that add new information. If there are contradictions between the two agents, flag them for the user to resolve. Do NOT list "confirmed agreements".
+1. **새 설정 키** — 공식 문서에는 있지만 보고서에 없는 키, 도입 버전 포함
+2. **변경된 설정 동작** — 타입, 기본값, 설명이 변경된 설정
+3. **폐기/제거된 설정** — 보고서에는 있지만 공식 문서에 없는 설정
+4. **권한 구문 변경** — 새 도구 패턴, 와일드카드 동작, 권한 모드 변경
+5. **MCP 설정 변경** — 새 MCP 구성 키, 매칭 동작, 서버 설정
+6. **샌드박스 설정 변경** — 새 샌드박스 옵션, 네트워크 설정, 명령어 제외
+7. **플러그인 설정 변경** — 새 플러그인 구성 키 또는 마켓플레이스 옵션
+8. **모델 구성 변경** — 새 모델 별칭, 노력 수준, 모델 환경 변수
+9. **표시 및 UX 변경** — 새 상태 라인 필드, 스피너 옵션, 표시 설정
+10. **환경 변수 완전성** — 공식 문서에는 있지만 보고서에 없는 변수, 또는 보고서에는 있지만 더 이상 문서화되지 않는 변수
+11. **설정 계층 정확성** — 우선순위 수준, 파일 위치, 재정의 동작 확인
+12. **예제 정확성** — 빠른 참조 완전 예제가 현재 설정을 반영하는지 여부
+13. **소스 정확성** — 모든 소스 링크가 유효하고 올바른 문서를 가리키는지 확인
+14. **claude-code-guide 에이전트 결과** — 전용 에이전트가 캡처하지 못한 에이전트의 고유한 인사이트. 새로운 정보를 추가하는 결과만 포함합니다. 두 에이전트 간에 모순이 있으면 사용자에게 해결을 위해 표시합니다. "확인된 동의"는 나열하지 마세요.
 
-> **Note:** Hook-related analysis (events, properties, matchers, exit codes, HTTP hooks, hook env vars) is **excluded** from this workflow. Hooks are maintained in the [claude-code-hooks](https://github.com/shanraisshan/claude-code-hooks) repo.
+> **참고:** 훅 관련 분석(이벤트, 속성, 매처, 종료 코드, HTTP 훅, 훅 환경 변수)은 **이 워크플로우에서 제외**됩니다. 훅은 [claude-code-hooks](https://github.com/shanraisshan/claude-code-hooks) 레포에서 관리됩니다.
 
-End with a prioritized **Action Items** summary table. Each item must include a `Status` column showing `NEW`, `RECURRING (first seen: <date>)`, or `RESOLVED`:
+`Status` 열이 `NEW`, `RECURRING (처음 발견: <날짜>)`, 또는 `RESOLVED`를 표시하는 우선순위 **액션 아이템** 요약 테이블로 끝냅니다:
 
 ```
 Priority Actions:
 #  | Type                  | Action                                    | Status
 1  | New Setting           | Add <key> to <section> table               | NEW
 2  | Changed Behavior      | Update <key> description                   | NEW
-3  | Deprecated Setting    | Remove <key> from table                    | RECURRING (first seen: 2026-03-05)
+3  | Deprecated Setting    | Remove <key> from table                    | RECURRING (처음 발견: 2026-03-05)
 4  | Permission Syntax     | Add new tool pattern syntax                | NEW
 5  | Env Variable          | Add <var> to environment variables table   | NEW
 7  | Example Update        | Update Quick Reference example             | NEW
 ```
 
-Also include a **Resolved Since Last Run** section listing any items from the previous run that are no longer issues.
+이전 실행에서 더 이상 문제가 없는 항목을 나열하는 **마지막 실행 이후 해결된 항목** 섹션도 포함합니다.
 
 ---
 
-## Phase 2.5: Append Summary to Changelog
+## Phase 2.5: 변경 로그에 요약 추가
 
-**This phase is MANDATORY — always execute it before presenting the report to the user.**
+**이 단계는 필수 — 사용자에게 보고서를 제출하기 전에 항상 실행합니다.**
 
-Read the existing `changelog/best-practice/claude-settings/changelog.md` file, then **append** (do NOT overwrite) a new entry at the end. The entry format must be exactly:
+기존 `changelog/best-practice/claude-settings/changelog.md` 파일을 읽은 다음 끝에 새 항목을 **추가**(덮어쓰지 말 것)합니다. 항목 형식은 정확히 다음과 같아야 합니다:
 
 ```markdown
 ---
@@ -148,43 +148,43 @@ Read the existing `changelog/best-practice/claude-settings/changelog.md` file, t
 | ... | ... | ... | ... | ... |
 ```
 
-**Status format — MUST use one of these three formats:**
-- `COMPLETE (reason)` — action was taken and resolved successfully
-- `INVALID (reason)` — finding was incorrect, not applicable, or intentional
-- `ON HOLD (reason)` — action deferred, waiting on external dependency or user decision
+**Status 형식 — 다음 세 가지 형식 중 하나를 사용해야 합니다:**
+- `COMPLETE (이유)` — 작업이 수행되어 성공적으로 해결됨
+- `INVALID (이유)` — 결과가 잘못되었거나 적용 불가능하거나 의도적임
+- `ON HOLD (이유)` — 외부 의존성 또는 사용자 결정 대기로 연기됨
 
-The `(reason)` is mandatory and must briefly explain what was done or why.
+`(이유)`는 필수이며 무엇이 수행되었는지 또는 이유를 간략히 설명해야 합니다.
 
-**Rules for appending:**
-- Always append — never overwrite or replace previous entries
-- The date and time is when the command is executed in Pakistan Standard Time (PKT, UTC+5); get it by running `TZ=Asia/Karachi date "+%Y-%m-%d %I:%M %p PKT"`. The version comes from agent findings
-- If `changelog/best-practice/claude-settings/changelog.md` doesn't exist or is empty, create it with the Status Legend table (see top of file) then the first entry
-- Each entry is separated by `---`
-- **Only include items with HIGH, MEDIUM, or LOW priority** — omit NONE priority items (things that need no action)
-
----
-
-## Phase 2.6: Update Last Updated Badge
-
-**This phase is MANDATORY — always execute it immediately after Phase 2.5, before presenting the report.**
-
-Update the "Last Updated" badge at the top of `best-practice/claude-settings.md`. Run `TZ=Asia/Karachi date "+%b %d, %Y %-I:%M %p PKT"` to get the time, URL-encode it (spaces to `%20`, commas to `%2C`), and replace the date portion in the badge. Also update the Claude Code version in the badge if it has changed.
-
-**Do NOT log badge updates as action items in the changelog or report.** Badge syncing is a routine part of every run, not a finding.
+**추가 규칙:**
+- 항상 추가 — 이전 항목을 덮어쓰거나 교체하지 마세요
+- 날짜와 시간은 파키스탄 표준시(PKT, UTC+5) 기준으로 명령이 실행될 때; `TZ=Asia/Karachi date "+%Y-%m-%d %I:%M %p PKT"`를 실행하여 가져오세요. 버전은 에이전트 결과에서 가져옵니다
+- `changelog/best-practice/claude-settings/changelog.md`가 없거나 비어 있으면 Status 범례 테이블(파일 상단 참조)로 만들고 첫 번째 항목 추가
+- 각 항목은 `---`로 구분됩니다
+- **HIGH, MEDIUM, LOW 우선순위 항목만 포함** — NONE 우선순위 항목은 제외 (조치가 필요 없는 항목)
 
 ---
 
-## Phase 2.7: Validate All Hyperlinks
+## Phase 2.6: 마지막 업데이트 뱃지 업데이트
 
-**This phase is MANDATORY — always execute it after Phase 2.6, before presenting the report.**
+**이 단계는 필수 — Phase 2.5 직후, 보고서 제출 전에 항상 실행합니다.**
 
-Scan `best-practice/claude-settings.md` for every hyperlink (both markdown `[text](url)` and inline URLs). For each link:
+`best-practice/claude-settings.md` 상단의 "Last Updated" 뱃지를 업데이트합니다. `TZ=Asia/Karachi date "+%b %d, %Y %-I:%M %p PKT"`를 실행하여 시간을 가져오고, URL 인코딩(공백은 `%20`, 쉼표는 `%2C`)하고, 뱃지의 날짜 부분을 교체합니다. Claude Code 버전이 변경된 경우 뱃지의 버전도 업데이트합니다.
 
-1. **Local file links** (relative paths): Verify the file exists at the resolved path using the Read tool. Flag any broken links.
-2. **External URLs** (e.g., `https://code.claude.com/docs/en/settings`): Fetch each URL using WebFetch and verify it returns a valid page (not a 404 or redirect to an error page). Flag any dead or moved links.
-3. **Anchor links** (e.g., `#section-name`): Verify the target heading exists within the same file.
+**뱃지 업데이트를 변경 로그나 보고서의 액션 아이템으로 기록하지 마세요.** 뱃지 동기화는 모든 실행의 일상적인 부분이지 결과가 아닙니다.
 
-Include a **Hyperlink Validation Log** in the report:
+---
+
+## Phase 2.7: 모든 하이퍼링크 검증
+
+**이 단계는 필수 — Phase 2.6 이후, 보고서 제출 전에 항상 실행합니다.**
+
+`best-practice/claude-settings.md`에서 모든 하이퍼링크(마크다운 `[text](url)` 및 인라인 URL 모두)를 스캔합니다. 각 링크에 대해:
+
+1. **로컬 파일 링크** (상대 경로): Read 도구를 사용하여 해결된 경로에 파일이 있는지 확인합니다. 끊긴 링크를 표시합니다.
+2. **외부 URL** (예: `https://code.claude.com/docs/en/settings`): WebFetch를 사용하여 각 URL을 가져오고 유효한 페이지를 반환하는지 확인합니다(404 또는 오류 페이지로 리다이렉트가 아닌). 끊기거나 이동된 링크를 표시합니다.
+3. **앵커 링크** (예: `#section-name`): 동일한 파일 내에 대상 헤딩이 있는지 확인합니다.
+
+보고서에 **하이퍼링크 검증 로그**를 포함합니다:
 
 ```
 Hyperlink Validation Log:
@@ -195,49 +195,49 @@ Hyperlink Validation Log:
 ...
 ```
 
-**If any links are broken**, add them as HIGH priority action items in the report. Broken links degrade the report's usefulness and must be fixed before any other changes.
+**끊긴 링크가 있으면** 보고서에 HIGH 우선순위 액션 아이템으로 추가합니다. 끊긴 링크는 보고서의 유용성을 저하시키며 다른 변경 사항보다 먼저 수정되어야 합니다.
 
 ---
 
-## Phase 3: Offer to Take Action
+## Phase 3: 작업 제안
 
-After presenting the report (and confirming both changelog and badge were updated), ask the user:
+보고서 제출 후(변경 로그와 뱃지가 업데이트되었는지 확인), 사용자에게 묻습니다:
 
-1. **Execute all actions** — Handle everything (add missing settings, update descriptions, fix examples)
-2. **Execute specific actions** — User picks which numbers to execute
-3. **Just save the report** — No changes
+1. **모든 작업 실행** — 모든 것 처리 (누락된 설정 추가, 설명 업데이트, 예제 수정)
+2. **특정 작업 실행** — 사용자가 실행할 번호 선택
+3. **보고서만 저장** — 변경 없음
 
-When executing:
-- **New settings**: Add to the appropriate section table with correct type, default, and description
-- **Changed behavior**: Update the setting description or default in the table
-- **Deprecated settings**: Confirm with user before removing
-- **Permission syntax changes**: Update the Permission Syntax table with new patterns
-- **MCP setting changes**: Update the MCP Settings section
-- **Sandbox setting changes**: Update the Sandbox Settings section
-- **Plugin setting changes**: Update the Plugin Settings section
-- **Model changes**: Update the Model Configuration section
-- **Display changes**: Update the Display & UX section
-- **Environment variable changes**: Add/update/remove vars in the Environment Variables section
-- **Settings hierarchy changes**: Update the Settings Hierarchy table
-- **Example updates**: Update the Quick Reference complete example to reflect current settings
-- **Broken links**: Fix or replace broken URLs
-- After all actions, re-run verification to confirm consistency
+실행 시:
+- **새 설정**: 올바른 타입, 기본값, 설명으로 적절한 섹션 테이블에 추가
+- **변경된 동작**: 테이블의 설정 설명 또는 기본값 업데이트
+- **폐기된 설정**: 제거 전 사용자 확인
+- **권한 구문 변경**: 새 패턴으로 권한 구문 테이블 업데이트
+- **MCP 설정 변경**: MCP 설정 섹션 업데이트
+- **샌드박스 설정 변경**: 샌드박스 설정 섹션 업데이트
+- **플러그인 설정 변경**: 플러그인 설정 섹션 업데이트
+- **모델 변경**: 모델 구성 섹션 업데이트
+- **표시 변경**: 표시 및 UX 섹션 업데이트
+- **환경 변수 변경**: 환경 변수 섹션에서 변수 추가/업데이트/제거
+- **설정 계층 변경**: 설정 계층 테이블 업데이트
+- **예제 업데이트**: 현재 설정을 반영하도록 빠른 참조 완전 예제 업데이트
+- **끊긴 링크**: 끊기거나 교체된 URL 수정
+- 모든 작업 후 검증을 재실행하여 일관성 확인
 
 ---
 
-## Critical Rules
+## 중요 규칙
 
-1. **Launch BOTH agents in parallel** in a single message — never sequentially
-2. **Wait for both agents** before generating the report
-3. **Never guess** versions or dates — use data from the agents
-4. **New settings keys are HIGH PRIORITY** — they require table and example updates
-5. **Cross-reference setting counts** — the number of settings in each table must match official docs
-6. **Don't auto-execute** — always present the report first
-7. **ALWAYS append to changelog** — Phase 2.5 is mandatory. Never skip it. Never overwrite previous entries.
-8. **Compare with previous runs** — read the last 25 entries from the changelog and mark each action item as NEW, RECURRING, or RESOLVED.
-9. **ALWAYS execute the verification checklist** — read the verification-checklist.md and execute every rule. Include a Verification Log in the report. Append new rules when a new type of drift is discovered.
-10. **Checklist rules are append-only** — never remove or weaken existing rules. Only add new rules or upgrade depth levels.
-11. **ALWAYS update the Last Updated badge** — Phase 2.6 is mandatory. Never skip it.
-12. **ALWAYS validate all hyperlinks** — Phase 2.7 is mandatory. Never skip it. Broken links are HIGH priority.
-13. **Environment variables are split across two files** — `claude-settings.md` owns `env`-configurable vars; `claude-cli-startup-flags.md` owns startup-only vars. Do NOT flag env vars as missing if they belong in the CLI file. Cross-reference `best-practice/claude-cli-startup-flags.md` to verify ownership boundaries.
-14. **Verify the settings hierarchy** — the 5-level override chain plus managed policy layer must match official docs exactly.
+1. **두 에이전트를 단일 메시지에서 병렬로 실행** — 순차적으로 실행하지 마세요
+2. **두 에이전트가 완료될 때까지 기다리기** — 보고서를 생성하기 전에
+3. **버전이나 날짜를 추측하지 마세요** — 에이전트의 데이터 사용
+4. **새 설정 키는 최고 우선순위** — 테이블 및 예제 업데이트가 필요합니다
+5. **설정 수 교차 참조** — 각 테이블의 설정 수는 공식 문서와 일치해야 합니다
+6. **자동 실행하지 마세요** — 항상 먼저 보고서 제출
+7. **항상 변경 로그에 추가** — Phase 2.5는 필수입니다. 절대 건너뛰지 마세요. 이전 항목을 덮어쓰지 마세요.
+8. **이전 실행과 비교** — 변경 로그에서 마지막 25개 항목을 읽고 각 액션 아이템을 NEW, RECURRING, RESOLVED로 표시합니다.
+9. **항상 검증 체크리스트 실행** — verification-checklist.md를 읽고 모든 규칙을 실행합니다. 보고서에 검증 로그를 포함합니다. 새로운 유형의 드리프트가 발견되면 새 규칙을 추가합니다.
+10. **체크리스트 규칙은 추가 전용** — 기존 규칙을 제거하거나 약화시키지 마세요. 새 규칙을 추가하거나 깊이 수준을 높이는 것만 허용됩니다.
+11. **항상 마지막 업데이트 뱃지 업데이트** — Phase 2.6은 필수입니다. 절대 건너뛰지 마세요.
+12. **항상 모든 하이퍼링크 검증** — Phase 2.7은 필수입니다. 절대 건너뛰지 마세요. 끊긴 링크는 HIGH 우선순위입니다.
+13. **환경 변수는 두 파일로 분리** — `claude-settings.md`는 `env`-구성 가능 변수를 소유하고; `claude-cli-startup-flags.md`는 시작 전용 변수를 소유합니다. CLI 파일에 속하는 환경 변수를 누락으로 표시하지 마세요. `best-practice/claude-cli-startup-flags.md`를 교차 참조하여 소유권 경계를 확인합니다.
+14. **설정 계층 확인** — 관리 정책 레이어와 함께 5단계 재정의 체인이 공식 문서와 정확히 일치해야 합니다.
